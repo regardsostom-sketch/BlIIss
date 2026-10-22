@@ -95,7 +95,8 @@ export async function move(fd: FormData) {
   const table = str(fd, "table") === "subtopics" ? "subtopics" : "topics";
   const parent = table === "topics" ? "program_id" : "topic_id";
   const down = str(fd, "dir") === "down";
-  const { data: row } = await sb.from(table).select(`id,position,${parent}`).eq("id", str(fd, "id")).single();
+  const { data: found } = await sb.from(table).select(`id,position,${parent}`).eq("id", str(fd, "id")).single();
+  const row = found as Record<string, any> | null;
   if (!row) return;
   const q = sb.from(table).select("id,position").eq(parent, row[parent]);
   const { data: nb } = await (down ? q.gt("position", row.position) : q.lt("position", row.position)).order("position", { ascending: down }).limit(1);
